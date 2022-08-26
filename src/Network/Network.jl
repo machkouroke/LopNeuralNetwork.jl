@@ -33,8 +33,7 @@ Forward propagation of the neural network. For a given input X, the function ret
 function forward_propagation(network::NeuralNetwork, X::Array)::Dict{Int64, Matrix{Float64}}
     A = Dict{Int64, Matrix{Float64}}(0 => X)
     for i in 1:size(network.number_per_layer)[1] - 1
-        answer = A[i-1]
-        Z = z(network.W[i], answer, network.b[i])
+        Z = z(network.W[i], A[i-1], network.b[i])
         A[i] = a(Z)
     end
     return A
@@ -69,10 +68,10 @@ function score(network::NeuralNetwork, data::AbstractMatrix, output::AbstractMat
 end
 
 
-function gradient!(network::NeuralNetwork, data::AbstractMatrix, output::AbstractMatrix, data_test, output_test; iter::Int64=1000)
-    loss = []
-    accuracy = []
-    accuracy_test = []
+function gradient!(network::NeuralNetwork, data::AbstractMatrix, output::AbstractMatrix, data_test, output_test; iter::Int64=1000)::Tuple{Array{Float64}, Array{Float64}, Array{Float64}}
+    loss::Array{Float64} = []
+    accuracy::Array{Float64} = []
+    accuracy_test::Array{Float64} = []
     println("Start of gradient")
     for _ in ProgressBar(1:iter)
         # Neurone update
@@ -91,23 +90,3 @@ function gradient!(network::NeuralNetwork, data::AbstractMatrix, output::Abstrac
     return loss, accuracy, accuracy_test
 end
 
-# # Feature extraction
-# n_feature = 2
-# n_element = 120
-# stop_train = 100
-# n_neural_per_layer = [2]
-# X, y = make_blobs(n_element, n_feature; centers=2, as_table=false)
-# X = permutedims(X, (2, 1))
-# y = [i == 1 ? 0 : 1 for i in reshape(y, (1, n_element))]
-# X_train, y_train, X_test, y_test = X[:, 1:stop_train], y[:, 1:stop_train], X[:, stop_train + 1:n_element], y[:, stop_train + 1:n_element]
-
-# # Initialisation of the neural network and fit
-# neuron = NeuralNetwork(n_feature, n_neural_per_layer)
-# # loss, accuracy, accuracy_test = fit!(neuron, X_train, y_train, X_test, y_test)
-
-# # # Plot the loss and accuracy
-# # p1 = plot(loss, title="Loss")
-# # p2 = plot(accuracy, title="Accuracy")
-# # p3 = plot(accuracy_test, title="Accuracy Test")
-# # plot(p1, p2, p3, layout=(1,3))
-# # score(neuron, X_train, y_train)
