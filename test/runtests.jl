@@ -1,35 +1,57 @@
 using LopNeuralNetwork
 using Test
+using MLJ: make_blobs
 
-
+include("random_data.jl")
+include("diemensionnality_test.jl")
+include("plot_test.jl")
 @testset "Random Data" begin
-    # Feature extraction
-    const n_feature = 2
-    const n_element = 120
-    const stop_train = 100
-    const n_neural_per_layer = [2]
-    const number_of_layer = length(n_neural_per_layer) + 1
-    X, y = make_blobs(n_element, n_feature; centers=2, as_table=false)
-    X = permutedims(X, (2, 1))
-    X = permutedims(X, (2, 1))
-    y = [i == 1 ? 0 : 1 for i in reshape(y, (1, n_element))]
-    X_train, y_train, X_test, y_test = X[:, 1:stop_train], y[:, 1:stop_train],
-    X[:, stop_train+1:n_element], y[:, stop_train+1:n_element]
-    # Initialisation of the neural network and fit
-    random_network = NeuralNetwork(n_feature, n_neural_per_layer)
-    @test_set "Neurone Initialisation test" begin
-        @test size(random_network.W) == number_of_layer
-        @test size(random_network.b) == number_of_layer
-    end
-    @testset "Dimensionnality test" begin
-        @test "Dimensionnality test" begin
-            for (i, w) in enumerate(random_network.W)
-                @test size(w) == (n_neural_per_layer[i + 1] , n_neural_per_layer[i])
-            end
-            for (i, b) in enumerate(random_network.b)
-                @test size(b) == (n_neural_per_layer[i + 1], 1)
-            end
-        end
-    end
+    # Data generation
+    n_feature = 2
+    n_element = 1200
+    stop_train = 1000
+    n_neural_per_layer = [2]
+    X_train, y_train, X_test, y_test, number_of_layer = generate_random_data(n_feature, n_element, stop_train, n_neural_per_layer)
     
+    # Initialisation of the neural 
+    random_network = NeuralNetwork(n_feature, n_neural_per_layer)
+    @testset "Neurone Initialisation test" begin
+        @test length(random_network.W) == number_of_layer
+        @test length(random_network.b) == number_of_layer
+    end
+    dimensionnality(random_network)
+
+    # Fitting the neural network
+    loss, accuracy, accuracy_test = fit!(random_network, X_train, y_train, X_test, y_test)
+    dimensionnality(random_network)
+
+    # Plotting the results
+    plot_test(loss, accuracy, accuracy_test)
 end
+
+@testset "Cat vs Dog" begin
+    include("load_cat_vs_dog.jl")
+    
+    # Data generation
+    trans(X) = permutedims(X, (2, 1))
+    X_train, y_train, X_test, y_test = trans.(preprocess_data())
+    n_feature = size(X_train)[1]
+    n_element = size(X_train)[2]
+    n_neural_per_layer = [10, 10, 10, 10, 10]  
+    number_of_layer = length(n_neural_per_layer) + 1  
+    # Initialisation of the neural 
+    cat_dog_network = NeuralNetwork(n_feature, n_neural_per_layer)
+    @testset "Neurone Initialisation test" begin
+        @test length(cat_dog_network.W) == number_of_layer
+        @test length(cat_dog_network.b) == number_of_layer
+    end
+    dimensionnality(cat_dog_network)
+    # Fitting the neural network
+    loss, accuracy, accuracy_test = fit!(cat_dog_network, X_train, y_train, X_test, y_test)
+    dimensionnality(cat_dog_network)
+
+    # Plotting the results
+    plot_test(loss, accuracy, accuracy_test)
+end
+
+"Done"
