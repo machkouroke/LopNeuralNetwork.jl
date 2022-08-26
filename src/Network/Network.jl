@@ -73,19 +73,21 @@ function gradient!(network::NeuralNetwork, data::AbstractMatrix, output::Abstrac
     accuracy::Array{Float64} = []
     accuracy_test::Array{Float64} = []
     println("Start of gradient")
-    for _ in ProgressBar(1:iter)
+    for i in ProgressBar(1:iter)
         # Neurone update
         A = forward_propagation(network, data)
         dW, db = back_propagation(network, output, A)
         network.W, network.b = update(dW, db, network.W, network.b, network.α)
 
         # Accuracy update
-        push!(loss, log_loss(A[length(network.number_per_layer) - 1], output))
-        y_pred = predict(network, data)
-        push!(accuracy, binary_accuracy(y_pred', output'))
-        y_pred_test = predict(network, data_test)
-        push!(accuracy_test, binary_accuracy(y_pred_test', output_test'))
-
+        if i % 10 == 0
+            push!(loss, log_loss(A[length(network.number_per_layer) - 1], output))
+            y_pred = predict(network, data)
+            push!(accuracy, binary_accuracy(y_pred', output'))
+            y_pred_test = predict(network, data_test)
+            push!(accuracy_test, binary_accuracy(y_pred_test', output_test'))
+        end
+    
     end
     return loss, accuracy, accuracy_test
 end
