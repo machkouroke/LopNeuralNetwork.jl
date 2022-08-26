@@ -59,8 +59,8 @@ function predict(network::NeuralNetwork, data::Array)
     # @show final_result
     return final_result .>= 0.5
 end
-function fit!(network::NeuralNetwork, data::Array, output::Array, data_test, y_test)
-    loss, accuracy, accuracy_test = gradient!(network, data, output, data_test, y_test)
+function fit!(network::NeuralNetwork, data::Array, output::Array, data_test, y_test, iter::Int64=1000)
+    loss, accuracy, accuracy_test = gradient!(network, data, output, data_test, y_test, iter)
     return loss, accuracy, accuracy_test
 end
 function score(network::NeuralNetwork, data::AbstractMatrix, output::AbstractMatrix)
@@ -68,7 +68,7 @@ function score(network::NeuralNetwork, data::AbstractMatrix, output::AbstractMat
 end
 
 
-function gradient!(network::NeuralNetwork, data::AbstractMatrix, output::AbstractMatrix, data_test, output_test; iter::Int64=1000)::Tuple{Array{Float64}, Array{Float64}, Array{Float64}}
+function gradient!(network::NeuralNetwork, data::AbstractMatrix, output::AbstractMatrix, data_test, output_test, iter::Int64)::Tuple{Array{Float64}, Array{Float64}, Array{Float64}}
     loss::Array{Float64} = []
     accuracy::Array{Float64} = []
     accuracy_test::Array{Float64} = []
